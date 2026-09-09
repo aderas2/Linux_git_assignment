@@ -1,51 +1,91 @@
 #!/usr/bin/sh
 
-
-# Extracting the data from the URL
+# EXTRACT
 
 echo "Extracting Data"
 
-# Defining the variables
-
+# Variables
 URL="https://www.stats.govt.nz/assets/Uploads/Annual-enterprise-survey/Annual-enterprise-survey-2023-financial-year-provisional/Download-data/annual-enterprise-survey-2023-financial-year-provisional.csv"
+
 Folder="raw"
 File_Name="Enterprise_Survey.csv"
 File_Copy="Copy_Survey.csv"
 New_File="2023_year_finance.csv"
 New_Dir="Transformed"
+Load_Dir="load"
 
-
-#creating the destination directory
-
+# Create directories
 mkdir -p "$Folder"
+mkdir -p "$New_Dir"
+mkdir -p "$Load_Dir"
 
-#Downloading the file using the URL
+# Download the file
+curl -L "$URL" -o "$Folder/$File_Name"
 
-curl -L "$URL" -o "$Folder/$File_name"
+if [ $? -eq 0 ]; then
+    echo "Download completed! File saved to $Folder/$File_Name"
+else
+    echo "Download failed!"
+    exit 1
+fi
 
-echo 'Download completed! Fild saved to "$Folder/$File_name" '
 
 
-# Creating a copy of the file before Data Transformation
-cp "$File_Name" ./"$File_Copy"
+# COPY ORIGINAL FILE BEFORE TRANSFORMATION
 
-# Transforming the Data
+cp "$Folder/$File_Name" "$Folder/$File_Copy"
+
+if [ $? -eq 0 ]; then
+    echo "Backup copy created: $Folder/$File_Copy"
+else
+    echo "Failed to create backup copy!"
+    exit 1
+fi
+
+
+
+# TRANSFORM
 
 echo "Renaming column"
 
-sed '1s/Variable_code/variable_code' "$File_Copy" | echo "Column renamed successfully"
+sed '1s/Variable_code/variable_code/' \
+    "$Folder/$File_Copy" \
+    > "$Folder/$File_Copy"
 
-# selecting the following columns: Year, Value, Units, variable_code and saving into a file and directory
+if [ $? -eq 0 ]; then
+    echo "Column renamed successfully"
+else
+    echo "Column rename failed!"
+    exit 1
+fi
 
-mkdir -p "$New_Dir"
 
-csvcut -c "Year", "Value", "Units", "variable_code" "$File_Copy" >  "$New_Dir/$New_File" | echo 'loaded into the folder "$New_Dir"'
+echo "Selecting required columns"
+
+csvcut -c Year,Value,Units,variable_code \
+    "$Folder/$File_Copy" \
+    > "$New_Dir/$New_File"
+
+if [ $? -eq 0 ]; then
+    echo "Selected columns successfully"
+    echo "Transformed file saved to $New_Dir/$New_File"
+else
+    echo "Column selection failed!"
+    exit 1
+fi
 
 
-# Loading the data
+# LOAD
 
 echo "Data Loading step"
 
-cp "$New_File" ./load | echo "data loaded successfully"
+cp "$New_Dir/$New_File" "$Load_Dir/$New_File"
 
+if [ $? -eq 0 ]; then
+    echo "Data loaded successfully to $Load_Dir/$New_File"
+else
+    echo "Data loading failed!"
+    exit 1
+fi
 
+echo "ETL process completed successfully!"
