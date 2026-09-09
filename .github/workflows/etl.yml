@@ -1,0 +1,23 @@
+name: Daily (12am) ETL
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install csvkit
+        run: |
+          pip install csvkit
+
+      - name: Run ETL
+        run: |
+          chmod +x etl.sh
+          ./etl.sh
