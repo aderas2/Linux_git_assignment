@@ -37,9 +37,15 @@ sed '1s/Variable_code/variable_code' "$File_Copy" | echo "Column renamed success
 
 # selecting the following columns: Year, Value, Units, variable_code and saving into a file and directory
 
-mkdir -p "$New_Dir" 
+mkdir -p "$New_Dir"
 
 csvcut -c "Year", "Value", "Units", "variable_code" "$File_Copy" >  "$New_Dir/$New_File" | echo 'loaded into the folder "$New_Dir"'
 
+
+# Loading the data
+
+echo "Data Loading step"
+
+cp "$New_File" ./load | echo "data loaded successfully"
 
 
