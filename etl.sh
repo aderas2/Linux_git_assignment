@@ -33,16 +33,19 @@ fi
 
 # COPY ORIGINAL FILE BEFORE TRANSFORMATION
 
+echo "Checking downloaded file..."
+ls -lh "$Folder/$File_Name"
+
+echo "Creating backup copy..."
+
 cp "$Folder/$File_Name" "$Folder/$File_Copy"
 
 if [ $? -eq 0 ]; then
-    echo "Backup copy created: $Folder/$File_Copy"
+    echo "Backup copy created successfully: $Folder/$File_Copy"
 else
-    echo "Failed to create backup copy!"
+    echo "ERROR: Failed to create backup copy!"
     exit 1
 fi
-
-
 
 # TRANSFORM
 
@@ -50,7 +53,7 @@ echo "Renaming column"
 
 sed '1s/Variable_code/variable_code/' \
     "$Folder/$File_Copy" \
-    > "$Folder/$File_Copy"
+    > "$Folder/temp_survey.csv"
 
 if [ $? -eq 0 ]; then
     echo "Column renamed successfully"
@@ -58,6 +61,9 @@ else
     echo "Column rename failed!"
     exit 1
 fi
+
+# Replace the original copy with the transformed version
+mv "$Folder/temp_survey.csv" "$Folder/$File_Copy"
 
 
 echo "Selecting required columns"
