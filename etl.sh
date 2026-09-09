@@ -11,6 +11,8 @@ URL="https://www.stats.govt.nz/assets/Uploads/Annual-enterprise-survey/Annual-en
 Folder="raw"
 File_Name="Enterprise_Survey.csv"
 File_Copy="Copy_Survey.csv"
+New_File="2023_year_finance.csv"
+New_Dir="Transformed"
 
 
 #creating the destination directory
@@ -31,6 +33,13 @@ cp "$File_Name" ./"$File_Copy"
 
 echo "Renaming column"
 
-sed '1s/Variable_code/variable_code' "$File_Copy"
+sed '1s/Variable_code/variable_code' "$File_Copy" | echo "Column renamed successfully"
 
-echo
+# selecting the following columns: Year, Value, Units, variable_code and saving into a file and directory
+
+mkdir -p "$New_Dir" 
+
+csvcut -c "Year", "Value", "Units", "variable_code" "$File_Copy" >  "$New_Dir/$New_File" | echo 'loaded into the folder "$New_Dir"'
+
+
+
